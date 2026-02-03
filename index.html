@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dundee Mental Health Support</title>
+    <style>
+        :root { --primary: #005EB8; --danger: #D32F2F; --bg: #f4f4f9; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        
+        /* Sticky Header */
+        header { position: sticky; top: 0; background: var(--bg); padding-bottom: 15px; z-index: 100; }
+        h1 { font-size: 1.5rem; margin-bottom: 10px; }
+        
+        /* Search Bar */
+        input#search { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box;}
+        
+        /* Card Design */
+        .card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .card h3 { margin: 0 0 5px 0; color: var(--primary); }
+        .card .tag { display: inline-block; background: #e3f2fd; color: #0d47a1; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 10px; font-weight: bold; }
+        .card .desc { font-size: 0.95rem; line-height: 1.5; color: #555; margin-bottom: 15px; }
+        
+        /* Buttons */
+        .actions { display: flex; gap: 10px; }
+        .btn { flex: 1; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+        .btn-call { background: #e0e0e0; color: #333; }
+        .btn-map { background: white; border: 1px solid #ddd; color: #333; }
+        .crisis-mode .btn-call { background: var(--danger); color: white; }
+        
+        /* Crisis Banner */
+        .crisis-banner { background: #ffebee; border-left: 5px solid var(--danger); padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .crisis-banner h3 { margin: 0; color: var(--danger); }
+        .crisis-banner p { margin: 5px 0 0 0; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Dundee Support Directory</h1>
+    <input type="text" id="search" placeholder="Search (e.g., 'Youth', 'Crisis', 'Men')..." onkeyup="filterList()">
+</header>
+
+<div id="app-container">
+    <div class="crisis-banner">
+        <h3>Need Help Now?</h3>
+        <p>If you are in immediate danger, call 999.</p>
+    </div>
+    
+    <div id="service-list"></div>
+</div>
+
+<script>
+    // THE DATASET - Update this list to update the site
+    const services = [
+        {
+            name: "Hope Point",
+            category: "Crisis (24/7)",
+            desc: "The main crisis centre for Dundee. Open 24/7 for anyone in distress. Drop-in, call, or text.",
+            phone: "0800 955 0008",
+            address: "4 South Ward Road, Dundee",
+            mapLink: "https://maps.google.com/?q=4+South+Ward+Road+Dundee",
+            isCrisis: true
+        },
+        {
+            name: "The Corner",
+            category: "Youth (11-19)",
+            desc: "Confidential health & info service for young people. Drop-in available.",
+            phone: "01382 206 060",
+            address: "13 Shore Terrace, Dundee",
+            mapLink: "https://maps.google.com/?q=13+Shore+Terrace+Dundee",
+            isCrisis: false
+        },
+        {
+            name: "Feeling Strong",
+            category: "Youth Mental Health",
+            desc: "Peer coaching and social hubs for young people to build resilience.",
+            phone: "", 
+            address: "Block 5, 2 Seabraes Lane, Dundee",
+            mapLink: "https://maps.google.com/?q=Feeling+Strong+Dundee",
+            isCrisis: false
+        },
+        {
+            name: "Samaritans Dundee",
+            category: "Listening Service",
+            desc: "Free, confidential listening service. Open 24/7.",
+            phone: "116 123",
+            address: "6 Old Glamis Rd, Dundee",
+            mapLink: "",
+            isCrisis: true
+        },
+        {
+            name: "Andy's Man Club",
+            category: "Men's Group",
+            desc: "Peer-to-peer talking groups for men. Meets Monday nights at 7pm.",
+            phone: "",
+            address: "Boomerang Centre / Lynch Centre",
+            mapLink: "https://maps.google.com/?q=Boomerang+Community+Centre+Dundee",
+            isCrisis: false
+        },
+        {
+            name: "NHS 24",
+            category: "Urgent Care",
+            desc: "Call 111 for mental health triage when your GP is closed.",
+            phone: "111",
+            address: "",
+            mapLink: "",
+            isCrisis: true
+        }
+    ];
+
+    const listContainer = document.getElementById('service-list');
+
+    function renderServices(data) {
+        listContainer.innerHTML = "";
+        data.forEach(service => {
+            const div = document.createElement('div');
+            div.className = 'card ' + (service.isCrisis ? 'crisis-mode' : '');
+            
+            let phoneBtn = service.phone ? `<a href="tel:${service.phone.replace(/\s/g, '')}" class="btn btn-call">📞 ${service.phone}</a>` : '';
+            let mapBtn = service.mapLink ? `<a href="${service.mapLink}" target="_blank" class="btn btn-map">📍 Map</a>` : '';
+
+            div.innerHTML = `
+                <span class="tag">${service.category}</span>
+                <h3>${service.name}</h3>
+                <p class="desc">${service.desc}</p>
+                <div class="actions">
+                    ${phoneBtn}
+                    ${mapBtn}
+                </div>
+            `;
+            listContainer.appendChild(div);
+        });
+    }
+
+    function filterList() {
+        const query = document.getElementById('search').value.toLowerCase();
+        const filtered = services.filter(s => 
+            s.name.toLowerCase().includes(query) || 
+            s.category.toLowerCase().includes(query) || 
+            s.desc.toLowerCase().includes(query)
+        );
+        renderServices(filtered);
+    }
+
+    // Initial Load
+    renderServices(services);
+</script>
+
+</body>
+</html>
